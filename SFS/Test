@@ -73,5 +73,29 @@ tmpfs                                             394M     0  394M   0% /run/use
 sfs-nas1.eu-de.otc.t-systems.com:/share-d7520f16   10G     0   10G   0% /testdir
 root@ubuntu:/home/ubuntu#
 
-3. Windows 2012 
-https://www.server-world.info/en/note?os=Windows_Server_2012&p=nfs&f=3 
+3. Windows 2012  # https://www.server-world.info/en/note?os=Windows_Server_2012&p=nfs&f=3   
+# SFS is not recommended to be mounted in Windows by NFS Client , File-locks and performance issues 
+
+
+C:\Users\Administrator>mount sfs-nas1.eu-de.otc.t-systems.com:/share-d7520f16 Z:
+\
+Z: is now successfully connected to sfs-nas1.eu-de.otc.t-systems.com:/share-d752
+0f16
+
+The command completed successfully.
+
+C:\Users\Administrator>Z:
+
+Z:\>dir
+ Volume in drive Z has no label.
+ Volume Serial Number is 0000-1FFF
+
+ Directory of Z:\
+
+12/06/2017  03:18 PM    <DIR>          .
+12/06/2017  03:18 PM    <DIR>          ..
+               0 File(s)          8,192 bytes
+               2 Dir(s)  10,737,418,240 bytes free
+
+Z:\>
+
