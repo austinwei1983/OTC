@@ -1,4 +1,5 @@
-Windows 2012  # https://www.server-world.info/en/note?os=Windows_Server_2012&p=nfs&f=3   
+Windows 2012  
+# https://www.server-world.info/en/note?os=Windows_Server_2012&p=nfs&f=3   
 # SFS is not recommended to be mounted in Windows by NFS Client , File-locks and performance issues 
 
 
