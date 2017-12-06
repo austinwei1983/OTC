@@ -1,6 +1,7 @@
 Windows 2012  
 # https://www.server-world.info/en/note?os=Windows_Server_2012&p=nfs&f=3   
-# SFS is not recommended to be mounted in Windows by NFS Client , File-locks and performance issues 
+# SFS is not recommended to be mounted in Windows by NFS Client , File-locks and performance issues .
+# e.g : If you edit one file from from Windows by NFS client, it will overwrite the file directly without any notification that another user is editting the same file in another machine.  
 
 
 C:\Users\Administrator>mount sfs-nas1.eu-de.otc.t-systems.com:/share-d7520f16 Z:
