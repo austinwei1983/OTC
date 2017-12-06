@@ -1,3 +1,3 @@
 # OTC
 
-Different services on OTC
+Examples of OTC services 
