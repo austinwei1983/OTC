@@ -4,8 +4,8 @@ Windows 2012
 # e.g : If you edit one file from from Windows by NFS client, it will overwrite the file directly without any notification that another user is editting the same file in another machine.  
 
 
-C:\Users\Administrator>mount sfs-nas1.eu-de.otc.t-systems.com:/share-d7520f16 Z:
-\
+C:\Users\Administrator>mount sfs-nas1.eu-de.otc.t-systems.com:/share-d7520f16 Z:\
+
 Z: is now successfully connected to sfs-nas1.eu-de.otc.t-systems.com:/share-d752
 0f16
 
