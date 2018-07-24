@@ -177,3 +177,131 @@ root@ecs-wei:~#  /usr/bin/otc.sh custom GET  https://evs.eu-de.otc.t-systems.com
 root@ecs-wei:~#
 
 
+//check the data in second disk 
+
+//data in disk1
+root@seafile:~# mount /dev/xvdb /mnt
+root@seafile:~# ls /mnt
+hello.txt  helloworld.txt  novarc  weixiongchang
+root@seafile:~#
+
+//data in disk2
+root@ecs-wei:~# fdisk -l
+Disk /dev/vda: 4 GiB, 4294967296 bytes, 8388608 sectors
+Units: sectors of 1 * 512 = 512 bytes
+Sector size (logical/physical): 512 bytes / 512 bytes
+I/O size (minimum/optimal): 512 bytes / 512 bytes
+Disklabel type: dos
+Disk identifier: 0x8af44e35
+
+Device     Boot Start     End Sectors Size Id Type
+/dev/vda1  *     2048 8388574 8386527   4G 83 Linux
+
+
+Disk /dev/vdb: 10 GiB, 10737418240 bytes, 20971520 sectors
+Units: sectors of 1 * 512 = 512 bytes
+Sector size (logical/physical): 512 bytes / 512 bytes
+I/O size (minimum/optimal): 512 bytes / 512 bytes
+root@ecs-wei:~# parted /dev/vdb
+GNU Parted 3.2
+Using /dev/vdb
+Welcome to GNU Parted! Type 'help' to view a list of commands.
+(parted) p
+Model: Virtio Block Device (virtblk)
+Disk /dev/vdb: 10.7GB
+Sector size (logical/physical): 512B/512B
+Partition Table: loop
+Disk Flags:
+
+Number  Start  End     Size    File system  Flags
+ 1      0.00B  10.7GB  10.7GB  xfs
+
+(parted) q
+root@ecs-wei:~# mount /dev/vdb /mnt
+mount: /dev/vdb: can't read superblock
+root@ecs-wei:~#
+
+root@ecs-wei:~# /usr/bin/otc.sh custom DELETE  https://evs.eu-de.otc.t-systems.com/v2/b0410e5af2214cf1a4c3ae3f744d7ce8/os-vendor-replications/77f38967-b31d-4304-b9fb-0fd6cc891d5b
+#DEBUG: curl -X DELETE https://evs.eu-de.otc.t-systems.com/v2/b0410e5af2214cf1a4c3ae3f744d7ce8/os-vendor-replications/77f38967-b31d-4304-b9fb-0fd6cc891d5b
+ERROR[] 400: EVS Replication Pair 77f38967-b31d-4304-b9fb-0fd6cc891d5b error: EVS Replication Pair belongs to a replication consistency group
+
+root@ecs-wei:~# /usr/bin/otc.sh custom DELETE  https://evs.eu-de.otc.t-systems.com/v2/b0410e5af2214cf1a4c3ae3f744d7ce8/os-vendor-replication-consistency-groups/25d89eab-f468-4d1f-ad1b-4ceef02d9747
+#DEBUG: curl -X DELETE https://evs.eu-de.otc.t-systems.com/v2/b0410e5af2214cf1a4c3ae3f744d7ce8/os-vendor-replication-consistency-groups/25d89eab-f468-4d1f-ad1b-4ceef02d9747
+ERROR[] 400: Replication Consistency Group 25d89eab-f468-4d1f-ad1b-4ceef02d9747 error: Replication Consistency Group can't be deleted, because has EVS Replication Pairs
+root@ecs-wei:~#
+
+root@ecs-wei:~# /usr/bin/otc.sh custom POST  https://evs.eu-de.otc.t-systems.com/v2/b0410e5af2214cf1a4c3ae3f744d7ce8/os-vendor-replication-consistency-groups/25d89eab-f468-4d1f-ad1b-4ceef02d9747/action @failover001
+#DEBUG: curl -X POST -d "@failover001" https://evs.eu-de.otc.t-systems.com/v2/b0410e5af2214cf1a4c3ae3f744d7ce8/os-vendor-replication-consistency-groups/25d89eab-f468-4d1f-ad1b-4ceef02d9747/action
+
+root@ecs-wei:~# /usr/bin/otc.sh custom  GET  https://evs.eu-de.otc.t-systems.com/v2/b0410e5af2214cf1a4c3ae3f744d7ce8/os-vendor-replication-consistency-groups
+#DEBUG: curl -X GET https://evs.eu-de.otc.t-systems.com/v2/b0410e5af2214cf1a4c3ae3f744d7ce8/os-vendor-replication-consistency-groups
+{
+  "replication_consistency_groups": [
+    {
+      "status": "failovered",
+      "replication_model": "hypermetro",
+      "replication_ids": [
+        "77f38967-b31d-4304-b9fb-0fd6cc891d5b"
+      ],
+      "description": "my replication consistency group",
+      "fault_level": "0",
+      "updated_at": "2018-07-24T17:59:57.199762",
+      "replication_status": "active-stopped",
+      "id": "25d89eab-f468-4d1f-ad1b-4ceef02d9747",
+      "priority_station": "eu-de-02",
+      "name": "my replication consistency group",
+      "created_at": "2018-07-24T17:35:58.008918"
+    }
+  ]
+}
+root@ecs-wei:~# /usr/bin/otc.sh custom  GET  https://evs.eu-de.otc.t-systems.com/v2/b0410e5af2214cf1a4c3ae3f744d7ce8/os-vendor-replication-consistency-groups
+#DEBUG: curl -X GET https://evs.eu-de.otc.t-systems.com/v2/b0410e5af2214cf1a4c3ae3f744d7ce8/os-vendor-replication-consistency-groups
+{
+  "replication_consistency_groups": [
+    {
+      "status": "failovered",
+      "replication_model": "hypermetro",
+      "replication_ids": [
+        "77f38967-b31d-4304-b9fb-0fd6cc891d5b"
+      ],
+      "description": "my replication consistency group",
+      "fault_level": "0",
+      "updated_at": "2018-07-24T17:59:57.199762",
+      "replication_status": "active-stopped",
+      "id": "25d89eab-f468-4d1f-ad1b-4ceef02d9747",
+      "priority_station": "eu-de-02",
+      "name": "my replication consistency group",
+      "created_at": "2018-07-24T17:35:58.008918"
+    }
+  ]
+}
+root@ecs-wei:~# /usr/bin/otc.sh custom  GET  https://evs.eu-de.otc.t-systems.com/v2/b0410e5af2214cf1a4c3ae3f744d7ce8/os-vendor-replications
+#DEBUG: curl -X GET https://evs.eu-de.otc.t-systems.com/v2/b0410e5af2214cf1a4c3ae3f744d7ce8/os-vendor-replications
+{
+  "replications": [
+    {
+      "status": "available",
+      "replication_model": "hypermetro",
+      "description": "my replication",
+      "record_metadata": {
+        "volume_size": 10,
+        "volume_type": "SATA",
+        "multiattach": false
+      },
+      "fault_level": "0",
+      "updated_at": "2018-07-24T17:59:56.760655",
+      "replication_status": "active-stopped",
+      "id": "77f38967-b31d-4304-b9fb-0fd6cc891d5b",
+      "replication_consistency_group_id": "25d89eab-f468-4d1f-ad1b-4ceef02d9747",
+      "priority_station": "eu-de-02",
+      "volume_ids": "afa0ebdb-e928-42ae-9505-c675c871861f,0ec82ccf-2732-4f99-8c9e-4cd66d03e3e6",
+      "name": "myrep001",
+      "created_at": "2018-07-24T17:30:29.988176",
+      "progress": null
+    }
+  ]
+}
+
+
+
+
