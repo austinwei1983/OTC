@@ -59,6 +59,25 @@ root@ecs-wei:~# /usr/bin/otc.sh custom GET https://evs.eu-de.otc.t-systems.com/v
 }
 root@ecs-wei:~#
 
+//create consistence group 
+
+root@ecs-wei:~# cat sync001
+{
+"os-sync-replication-consistency-group": null
+}
+root@ecs-wei:~# cat consis
+{
+"replication_consistency_group": {
+"name": "my replication consistency group",
+"description": "my replication consistency group",
+"replication_ids": [
+"77f38967-b31d-4304-b9fb-0fd6cc891d5b"
+],
+"priority_station": "eu-de-01",
+"replication_model": "hypermetro"
+}
+}
+root@ecs-wei:~#
 root@ecs-wei:~# /usr/bin/otc.sh custom POST  https://evs.eu-de.otc.t-systems.com/v2/b0410e5af2214cf1a4c3ae3f744d7ce8/os-vendor-replication-consistency-groups @consis
 #DEBUG: curl -X POST -d "@consis" https://evs.eu-de.otc.t-systems.com/v2/b0410e5af2214cf1a4c3ae3f744d7ce8/os-vendor-replication-consistency-groups
 {
@@ -94,4 +113,67 @@ root@ecs-wei:~# /usr/bin/otc.sh custom GET  https://evs.eu-de.otc.t-systems.com/
   ]
 }
 root@ecs-wei:~#
+
+
+
+//start replication 
+root@ecs-wei:~# cat sync001
+{
+"os-sync-replication-consistency-group": null
+}
+root@ecs-wei:~#
+
+
+root@ecs-wei:~# /usr/bin/otc.sh custom POST  https://evs.eu-de.otc.t-systems.com/v2/b0410e5af2214cf1a4c3ae3f744d7ce8/os-vendor-replication-consistency-groups/25d89eab-f468-4d1f-ad1b-4ceef02d9747/action @sync001
+#DEBUG: curl -X POST -d "@sync001" https://evs.eu-de.otc.t-systems.com/v2/b0410e5af2214cf1a4c3ae3f744d7ce8/os-vendor-replication-consistency-groups/25d89eab-f468-4d1f-ad1b-4ceef02d9747/action
+
+root@ecs-wei:~# /usr/bin/otc.sh custom GET  https://evs.eu-de.otc.t-systems.com/v2/b0410e5af2214cf1a4c3ae3f744d7ce8/os-vendor-replication-consistency-groups
+#DEBUG: curl -X GET https://evs.eu-de.otc.t-systems.com/v2/b0410e5af2214cf1a4c3ae3f744d7ce8/os-vendor-replication-consistency-groups
+{
+  "replication_consistency_groups": [
+    {
+      "status": "available",
+      "replication_model": "hypermetro",
+      "replication_ids": [
+        "77f38967-b31d-4304-b9fb-0fd6cc891d5b"
+      ],
+      "description": "my replication consistency group",
+      "fault_level": "0",
+      "updated_at": "2018-07-24T17:36:02.177600",
+      "replication_status": "copying",
+      "id": "25d89eab-f468-4d1f-ad1b-4ceef02d9747",
+      "priority_station": "eu-de-01",
+      "name": "my replication consistency group",
+      "created_at": "2018-07-24T17:35:58.008918"
+    }
+  ]
+}
+root@ecs-wei:~#  /usr/bin/otc.sh custom GET  https://evs.eu-de.otc.t-systems.com/v2/b0410e5af2214cf1a4c3ae3f744d7ce8/os-vendor-replications
+#DEBUG: curl -X GET https://evs.eu-de.otc.t-systems.com/v2/b0410e5af2214cf1a4c3ae3f744d7ce8/os-vendor-replications
+{
+  "replications": [
+    {
+      "status": "available",
+      "replication_model": "hypermetro",
+      "description": "my replication",
+      "record_metadata": {
+        "volume_size": 10,
+        "volume_type": "SATA",
+        "multiattach": false
+      },
+      "fault_level": "0",
+      "updated_at": "2018-07-24T17:36:02.156387",
+      "replication_status": "copying",
+      "id": "77f38967-b31d-4304-b9fb-0fd6cc891d5b",
+      "replication_consistency_group_id": "25d89eab-f468-4d1f-ad1b-4ceef02d9747",
+      "priority_station": "eu-de-01",
+      "volume_ids": "afa0ebdb-e928-42ae-9505-c675c871861f,0ec82ccf-2732-4f99-8c9e-4cd66d03e3e6",
+      "name": "myrep001",
+      "created_at": "2018-07-24T17:30:29.988176",
+      "progress": "6"
+    }
+  ]
+}
+root@ecs-wei:~#
+
 
