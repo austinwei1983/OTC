@@ -1,0 +1,31 @@
+
+root@ecs-wei:~# cat rep001
+{
+"replication": {
+"name": "myrep001",
+"description": "my replication",
+"volume_ids": [
+"afa0ebdb-e928-42ae-9505-c675c871861f",
+"0ec82ccf-2732-4f99-8c9e-4cd66d03e3e6"
+],
+"priority_station": "eu-de-01",
+"replication_model": "hypermetro"
+}
+}
+root@ecs-wei:~#
+
+root@ecs-wei:~# /usr/bin/otc.sh custom POST https://evs.eu-de.otc.t-systems.com/v2/b0410e5af2214cf1a4c3ae3f744d7ce8/os-vendor-replications @rep001
+#DEBUG: curl -X POST -d "@rep001" https://evs.eu-de.otc.t-systems.com/v2/b0410e5af2214cf1a4c3ae3f744d7ce8/os-vendor-replications
+{
+  "replication": {
+    "status": "creating",
+    "priority_station": "eu-de-01",
+    "volume_ids": "afa0ebdb-e928-42ae-9505-c675c871861f,0ec82ccf-2732-4f99-8c9e-4cd66d03e3e6",
+    "name": "myrep001",
+    "updated_at": null,
+    "replication_consistency_group_id": null,
+    "created_at": "2018-07-24T16:34:40.149730",
+    "id": "6759323d-5dc2-4a4f-a57d-22b5c0490963",
+    "description": "my replication"
+  }
+}
