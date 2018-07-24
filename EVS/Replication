@@ -303,5 +303,8 @@ root@ecs-wei:~# /usr/bin/otc.sh custom  GET  https://evs.eu-de.otc.t-systems.com
 }
 
 
-
+root@ecs-wei:~# mount /dev/vdb /mnt
+root@ecs-wei:~# ls /mnt
+hello.txt  helloworld.txt  novarc  weixiongchang
+root@ecs-wei:~#
 
