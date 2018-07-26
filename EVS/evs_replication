@@ -1,0 +1,75 @@
+root@ecs-wei:~/replication# openstack volume create --size 10 --type SATA --availability-zone eu-de-01 sdrs01
++---------------------+--------------------------------------+
+| Field               | Value                                |
++---------------------+--------------------------------------+
+| attachments         | []                                   |
+| availability_zone   | eu-de-01                             |
+| bootable            | false                                |
+| consistencygroup_id | None                                 |
+| created_at          | 2018-07-26T12:38:50.972966           |
+| description         | None                                 |
+| encrypted           | False                                |
+| id                  | 185ecc9c-dbc9-40dc-827e-5b2a110f815b |
+| multiattach         | False                                |
+| name                | sdrs01                               |
+| properties          |                                      |
+| replication_status  | disabled                             |
+| shareable           | False                                |
+| size                | 10                                   |
+| snapshot_id         | None                                 |
+| source_volid        | None                                 |
+| status              | creating                             |
+| type                | SATA                                 |
+| updated_at          | None                                 |
+| user_id             | 48fe4345126141f0a210811a2e30e59b     |
++---------------------+--------------------------------------+
+
+root@ecs-wei:~/replication# openstack volume create --size 10 --type SATA --availability-zone eu-de-02 sdrs02
++---------------------+--------------------------------------+
+| Field               | Value                                |
++---------------------+--------------------------------------+
+| attachments         | []                                   |
+| availability_zone   | eu-de-02                             |
+| bootable            | false                                |
+| consistencygroup_id | None                                 |
+| created_at          | 2018-07-26T12:40:18.957784           |
+| description         | None                                 |
+| encrypted           | False                                |
+| id                  | 3ed80b77-0449-44a6-956b-dbfb3e5005db |
+| multiattach         | False                                |
+| name                | sdrs02                               |
+| properties          |                                      |
+| replication_status  | disabled                             |
+| shareable           | False                                |
+| size                | 10                                   |
+| snapshot_id         | None                                 |
+| source_volid        | None                                 |
+| status              | creating                             |
+| type                | SATA                                 |
+| updated_at          | None                                 |
+| user_id             | 48fe4345126141f0a210811a2e30e59b     |
++---------------------+--------------------------------------+
+root@ecs-wei:~/replication# openstack volue list | grep sdrs
+root@ecs-wei:~/replication# openstack volume list | grep sdrs
+| 3ed80b77-0449-44a6-956b-dbfb3e5005db | sdrs02                                                    | available |   10 |                                                                                    |
+| 185ecc9c-dbc9-40dc-827e-5b2a110f815b | sdrs01                                                    | available |   10 |    
+root@ecs-wei:~/replication# vi volume_replication.json
+root@ecs-wei:~/replication# cat volume_replication.json
+{
+"replication": {
+"name": "my_replication",
+"description": "my replication demo",
+"volume_ids": [
+"185ecc9c-dbc9-40dc-827e-5b2a110f815b",
+"3ed80b77-0449-44a6-956b-dbfb3e5005db"
+],
+"priority_station": "eu-de-01",
+"replication_model": "hypermetro"
+}
+}                                                                                |
+root@ecs-wei:~/replication#
+root@ecs-wei:~/replication#  openstack catalog list | grep evs
+|                           |               |   public: https://evs.eu-de.otc.t-systems.com/v2/b0410e5af2214cf1a4c3ae3f744d7ce8         |
+|                           |               |   public: https://evs.eu-de.otc.t-systems.com/v2/b0410e5af2214cf1a4c3ae3f744d7ce8         |
+root@ecs-wei:~/replication#
+
