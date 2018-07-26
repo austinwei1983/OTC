@@ -73,3 +73,64 @@ root@ecs-wei:~/replication#  openstack catalog list | grep evs
 |                           |               |   public: https://evs.eu-de.otc.t-systems.com/v2/b0410e5af2214cf1a4c3ae3f744d7ce8         |
 root@ecs-wei:~/replication#
 
+
+root@ecs-wei:~/replication# ls
+action_failover.json  action_reprotect.json  action_sync.json         consistency_group.json  volume_replication.json
+action_pause.json     action_reverse.json    action_synchronize.json  remove_replication_id
+root@ecs-wei:~/replication# cat *
+{
+"os-failover-replication-consistency-group": null
+}
+{
+"os-stop-replication-consistency-group": null
+}
+{
+"os-reprotect-replication-consistency-group": null
+}
+{
+"os-reverse-replication-consistency-group": null
+}
+{
+"os-sync-replication-consistency-group": null
+}
+{
+"os-sync-replication-consistency-group": null
+}
+{
+"replication_consistency_group": {
+"name": "my replication consistency group",
+"description": "my replication consistency group",
+"replication_ids": [
+"77f38967-b31d-4304-b9fb-0fd6cc891d5b"
+],
+"priority_station": "eu-de-01",
+"replication_model": "hypermetro"
+}
+}
+{
+"replication_consistency_group": {
+"name": "my replication consistency group",
+"description": "my replication consistency group",
+"replication_model": "hypermetro",
+"add_replication_ids": [
+],
+"remove_replication_ids": [
+"77f38967-b31d-4304-b9fb-0fd6cc891d5b"
+]
+}
+}
+{
+"replication": {
+"name": "my_replication",
+"description": "my replication demo",
+"volume_ids": [
+"185ecc9c-dbc9-40dc-827e-5b2a110f815b",
+"3ed80b77-0449-44a6-956b-dbfb3e5005db"
+],
+"priority_station": "eu-de-01",
+"replication_model": "hypermetro"
+}
+}
+root@ecs-wei:~/replication#
+
+
