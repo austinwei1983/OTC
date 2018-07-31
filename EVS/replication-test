@@ -1,0 +1,247 @@
+root@ecs-wei:~# openstack volume list | grep sdrs
+| 3ed80b77-0449-44a6-956b-dbfb3e5005db | sdrs02                                                    | available |   10 |                                                                                    |
+| 185ecc9c-dbc9-40dc-827e-5b2a110f815b | sdrs01                                                    | available |   10 |                                                                                    |
+root@ecs-wei:~# vi volume_replication.json
+root@ecs-wei:~# openstack volume show 185ecc9c-dbc9-40dc-827e-5b2a110f815b | grep availability_zone
+| availability_zone              | eu-de-01                             |
+root@ecs-wei:~# cat volume_replication.json
+{
+"replication": {
+"name": "my_replication",
+"description": "my replication demo",
+"volume_ids": [
+"185ecc9c-dbc9-40dc-827e-5b2a110f815b",
+"3ed80b77-0449-44a6-956b-dbfb3e5005db"
+],
+"priority_station": "eu-de-01",
+"replication_model": "hypermetro"
+}
+}
+root@ecs-wei:~#  /usr/bin/otc.sh custom POST https://evs.eu-de.otc.t-systems.com/v2/b0410e5af2214cf1a4c3ae3f744d7ce8/os-vendor-replications @volume_replication.json
+#DEBUG: curl -X POST -d "@volume_replication.json" https://evs.eu-de.otc.t-systems.com/v2/b0410e5af2214cf1a4c3ae3f744d7ce8/os-vendor-replications
+{
+  "replication": {
+    "status": "creating",
+    "priority_station": "eu-de-01",
+    "volume_ids": "185ecc9c-dbc9-40dc-827e-5b2a110f815b,3ed80b77-0449-44a6-956b-dbfb3e5005db",
+    "name": "my_replication",
+    "updated_at": null,
+    "replication_consistency_group_id": null,
+    "created_at": "2018-07-31T14:40:01.142670",
+    "id": "061737ca-78c2-47eb-bd6f-9f7d20376996",
+    "description": "my replication demo"
+  }
+}
+root@ecs-wei:~#
+root@ecs-wei:~# /usr/bin/otc.sh custom GET https://evs.eu-de.otc.t-systems.com/v2/b0410e5af2214cf1a4c3ae3f744d7ce8/os-vendor-replications
+#DEBUG: curl -X GET https://evs.eu-de.otc.t-systems.com/v2/b0410e5af2214cf1a4c3ae3f744d7ce8/os-vendor-replications
+{
+  "replications": [
+    {
+      "status": "available",
+      "replication_model": "hypermetro",
+      "description": "my replication demo",
+      "record_metadata": {
+        "volume_size": 10,
+        "volume_type": "SATA",
+        "multiattach": false
+      },
+      "fault_level": "0",
+      "updated_at": "2018-07-31T14:40:05.490231",
+      "replication_status": "inactive",
+      "id": "061737ca-78c2-47eb-bd6f-9f7d20376996",
+      "replication_consistency_group_id": null,
+      "priority_station": "eu-de-01",
+      "volume_ids": "185ecc9c-dbc9-40dc-827e-5b2a110f815b,3ed80b77-0449-44a6-956b-dbfb3e5005db",
+      "name": "my_replication",
+      "created_at": "2018-07-31T14:40:01.142670",
+      "progress": null
+    }
+  ]
+}
+root@ecs-wei:~#
+root@ecs-wei:~# vi consistency_group.json
+root@ecs-wei:~# cat consistency_group.json
+{
+"replication_consistency_group": {
+"name": "my replication consistency group",
+"description": "my replication consistency group",
+"replication_ids": [
+"061737ca-78c2-47eb-bd6f-9f7d20376996"
+],
+"priority_station": "eu-de-01",
+"replication_model": "hypermetro"
+}
+}
+root@ecs-wei:~# /usr/bin/otc.sh custom POST  https://evs.eu-de.otc.t-systems.com/v2/b0410e5af2214cf1a4c3ae3f744d7ce8/os-vendor-replication-consistency-groups @consistency_group.json
+#DEBUG: curl -X POST -d "@consistency_group.json" https://evs.eu-de.otc.t-systems.com/v2/b0410e5af2214cf1a4c3ae3f744d7ce8/os-vendor-replication-consistency-groups
+{
+  "replication_consistency_group": {
+    "status": "creating",
+    "priority_station": "eu-de-01",
+    "description": "my replication consistency group",
+    "created_at": "2018-07-31T14:47:04.156983",
+    "updated_at": null,
+    "id": "041fe45e-1891-4675-915e-292a1be83bb6",
+    "name": "my replication consistency group"
+  }
+}
+root@ecs-wei:~# /usr/bin/otc.sh custom GET https://evs.eu-de.otc.t-systems.com/v2/b0410e5af2214cf1a4c3ae3f744d7ce8/os-vendor-replication-consistency-groups
+#DEBUG: curl -X GET https://evs.eu-de.otc.t-systems.com/v2/b0410e5af2214cf1a4c3ae3f744d7ce8/os-vendor-replication-consistency-groups
+{
+  "replication_consistency_groups": [
+    {
+      "status": "available",
+      "priority_station": "eu-de-01",
+      "replication_ids": [
+        "061737ca-78c2-47eb-bd6f-9f7d20376996"
+      ],
+      "name": "my replication consistency group",
+      "replication_model": "hypermetro",
+      "updated_at": "2018-07-31T14:47:07.882202",
+      "created_at": "2018-07-31T14:47:04.156983",
+      "replication_status": "active-stopped",
+      "id": "041fe45e-1891-4675-915e-292a1be83bb6",
+      "description": "my replication consistency group"
+    }
+  ]
+}
+root@ecs-wei:~#
+root@ecs-wei:~# /usr/bin/otc.sh custom GET https://evs.eu-de.otc.t-systems.com/v2/b0410e5af2214cf1a4c3ae3f744d7ce8/os-vendor-replications
+#DEBUG: curl -X GET https://evs.eu-de.otc.t-systems.com/v2/b0410e5af2214cf1a4c3ae3f744d7ce8/os-vendor-replications
+{
+  "replications": [
+    {
+      "status": "available",
+      "replication_model": "hypermetro",
+      "description": "my replication demo",
+      "record_metadata": {
+        "volume_size": 10,
+        "volume_type": "SATA",
+        "multiattach": false
+      },
+      "fault_level": "0",
+      "updated_at": "2018-07-31T14:47:07.860506",
+      "replication_status": "inactive",
+      "id": "061737ca-78c2-47eb-bd6f-9f7d20376996",
+      "replication_consistency_group_id": "041fe45e-1891-4675-915e-292a1be83bb6",
+      "priority_station": "eu-de-01",
+      "volume_ids": "185ecc9c-dbc9-40dc-827e-5b2a110f815b,3ed80b77-0449-44a6-956b-dbfb3e5005db",
+      "name": "my_replication",
+      "created_at": "2018-07-31T14:40:01.142670",
+      "progress": null
+    }
+  ]
+}
+root@ecs-wei:~#
+
+root@ecs-wei:~# vi action_sync.json
+root@ecs-wei:~# cat action_sync.json
+{
+"os-sync-replication-consistency-group": null
+}
+
+root@ecs-wei:~# /usr/bin/otc.sh custom POST  https://evs.eu-de.otc.t-systems.com/v2/b0410e5af2214cf1a4c3ae3f744d7ce8/os-vendor-replication-consistency-groups/041fe45e-1891-4675-915e-292a1be83bb6/action @action_sync.json
+#DEBUG: curl -X POST -d "@action_sync.json" https://evs.eu-de.otc.t-systems.com/v2/b0410e5af2214cf1a4c3ae3f744d7ce8/os-vendor-replication-consistency-groups/041fe45e-1891-4675-915e-292a1be83bb6/action
+
+
+root@ecs-wei:~# /usr/bin/otc.sh custom GET https://evs.eu-de.otc.t-systems.com/v2/b0410e5af2214cf1a4c3ae3f744d7ce8/os-vendor-replication-consistency-groups
+#DEBUG: curl -X GET https://evs.eu-de.otc.t-systems.com/v2/b0410e5af2214cf1a4c3ae3f744d7ce8/os-vendor-replication-consistency-groups
+{
+  "replication_consistency_groups": [
+    {
+      "status": "available",
+      "replication_model": "hypermetro",
+      "replication_ids": [
+        "061737ca-78c2-47eb-bd6f-9f7d20376996"
+      ],
+      "description": "my replication consistency group",
+      "fault_level": "0",
+      "updated_at": "2018-07-31T14:47:07.882202",
+      "replication_status": "copying",
+      "id": "041fe45e-1891-4675-915e-292a1be83bb6",
+      "priority_station": "eu-de-01",
+      "name": "my replication consistency group",
+      "created_at": "2018-07-31T14:47:04.156983"
+    }
+  ]
+}
+root@ecs-wei:~# /usr/bin/otc.sh custom GET https://evs.eu-de.otc.t-systems.com/v2/b0410e5af2214cf1a4c3ae3f744d7ce8/os-vendor-replications
+#DEBUG: curl -X GET https://evs.eu-de.otc.t-systems.com/v2/b0410e5af2214cf1a4c3ae3f744d7ce8/os-vendor-replications
+{
+  "replications": [
+    {
+      "status": "available",
+      "replication_model": "hypermetro",
+      "description": "my replication demo",
+      "record_metadata": {
+        "volume_size": 10,
+        "volume_type": "SATA",
+        "multiattach": false
+      },
+      "fault_level": "0",
+      "updated_at": "2018-07-31T14:47:07.860506",
+      "replication_status": "copying",
+      "id": "061737ca-78c2-47eb-bd6f-9f7d20376996",
+      "replication_consistency_group_id": "041fe45e-1891-4675-915e-292a1be83bb6",
+      "priority_station": "eu-de-01",
+      "volume_ids": "185ecc9c-dbc9-40dc-827e-5b2a110f815b,3ed80b77-0449-44a6-956b-dbfb3e5005db",
+      "name": "my_replication",
+      "created_at": "2018-07-31T14:40:01.142670",
+      "progress": "8"
+    }
+  ]
+}
+root@ecs-wei:~#
+
+root@ecs-wei:~# /usr/bin/otc.sh custom GET https://evs.eu-de.otc.t-systems.com/v2/b0410e5af2214cf1a4c3ae3f744d7ce8/os-vendor-replication-consistency-groups
+#DEBUG: curl -X GET https://evs.eu-de.otc.t-systems.com/v2/b0410e5af2214cf1a4c3ae3f744d7ce8/os-vendor-replication-consistency-groups
+{
+  "replication_consistency_groups": [
+    {
+      "status": "available",
+      "replication_model": "hypermetro",
+      "replication_ids": [
+        "061737ca-78c2-47eb-bd6f-9f7d20376996"
+      ],
+      "description": "my replication consistency group",
+      "fault_level": "0",
+      "updated_at": "2018-07-31T14:47:07.882202",
+      "replication_status": "active",
+      "id": "041fe45e-1891-4675-915e-292a1be83bb6",
+      "priority_station": "eu-de-01",
+      "name": "my replication consistency group",
+      "created_at": "2018-07-31T14:47:04.156983"
+    }
+  ]
+}
+root@ecs-wei:~# /usr/bin/otc.sh custom GET https://evs.eu-de.otc.t-systems.com/v2/b0410e5af2214cf1a4c3ae3f744d7ce8/os-vendor-replications
+#DEBUG: curl -X GET https://evs.eu-de.otc.t-systems.com/v2/b0410e5af2214cf1a4c3ae3f744d7ce8/os-vendor-replications
+{
+  "replications": [
+    {
+      "status": "available",
+      "replication_model": "hypermetro",
+      "description": "my replication demo",
+      "record_metadata": {
+        "volume_size": 10,
+        "volume_type": "SATA",
+        "multiattach": false
+      },
+      "fault_level": "0",
+      "updated_at": "2018-07-31T14:47:07.860506",
+      "replication_status": "active",
+      "id": "061737ca-78c2-47eb-bd6f-9f7d20376996",
+      "replication_consistency_group_id": "041fe45e-1891-4675-915e-292a1be83bb6",
+      "priority_station": "eu-de-01",
+      "volume_ids": "185ecc9c-dbc9-40dc-827e-5b2a110f815b,3ed80b77-0449-44a6-956b-dbfb3e5005db",
+      "name": "my_replication",
+      "created_at": "2018-07-31T14:40:01.142670",
+      "progress": "100"
+    }
+  ]
+}
+root@ecs-wei:~#
+
+
+
