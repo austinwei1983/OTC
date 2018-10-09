@@ -1,0 +1,258 @@
+root@seafile:/netapp# cat heat_single.json
+heat_template_version: 2013-05-23
+
+description: ONTAP Select Single Node Cluster Template.
+
+parameters:
+  flavor:
+    type: string
+    description: Instance type for the instance to be created
+    default: s2.xlarge.4
+  ontap_image:
+    type: string
+    default: "ontapsinglenodetest3"
+    description: ID or name of the image to use for the instance
+  availability_zone:
+    type: string
+    description: default to AZ1 for ONTAPP.
+    default: eu-de-01
+  network_external:
+    type: string
+    description: The network for the VM
+    default: 9c58272b-d411-4de6-abf1-7b27acf647bc
+  cluster_name:
+    type: string
+    description: The name of cluster
+    default: "heat-demo-single-node"
+  node_name:
+    type: string
+    description: The name of node
+    default: "heat-demo-node2"
+  cluster_mgmt_netmask:
+    type: string
+    description: Netmask for cluster mgmt port
+    default: 255.255.255.0
+  cluster_mgmt_gateway:
+    type: string
+    description: Gateway for cluster mgmt port
+    default: 192.168.0.1
+  node_mgmt_netmask:
+    type: string
+    description: Netmask for node mgmt port
+    default: 255.255.255.0
+  node_mgmt_gateway:
+    type: string
+    description: Gateway for node mgmt port
+    default: 192.168.0.1
+  root_disk_size_mb:
+    type: number
+    default: 69632
+  serial_number:
+    type: string
+    default: "99887766554433221101"
+
+resources:
+  nw_port0 :
+    type : OS::Neutron::Port
+    properties:
+      network_id: {get_param: network_external}
+  nw_port1 :
+    type : OS::Neutron::Port
+    properties:
+      network_id : {get_param: network_external}
+
+  my_instance:
+    type: OS::Nova::Server
+    depends_on: [ sdot_boot_volume_1, sdot_coredump_vol_1, sdot_root_vol_1_1, sdot_data_vol_1_1, sdot_data_vol_1_2 ]
+    properties:
+      name: { get_param: node_name }
+      flavor: { get_param: flavor }
+      networks: [{port: {get_resource: nw_port0}}, {port: {get_resource: nw_port1}}]
+      block_device_mapping_v2: [{ "device_name": "vda","disk_bus": "scsi", "volume_id" : { get_resource : sdot_boot_volume_1 }, "boot_index": 0 },
+                    {  "disk_bus": "scsi", "volume_id" : { get_resource : sdot_coredump_vol_1 }, "boot_index": 1 },
+                    {  "disk_bus": "scsi", "volume_id" : { get_resource : sdot_root_vol_1_1 }, "boot_index": -1 },
+                    {  "disk_bus": "scsi", "volume_id" : { get_resource : sdot_data_vol_1_1 }, "boot_index": -1 },
+                    {  "disk_bus": "scsi", "volume_id" : { get_resource : sdot_data_vol_1_2 }, "boot_index": -1}]
+      availability_zone: { get_param: availability_zone }
+      config_drive: "true"
+      user_data_format: RAW
+      user_data:
+        str_replace:
+          template: |
+            NODE_NAME=$node_name
+            CLUSTER_NAME=$cluster_name
+            CLUSTER_UUID=c1142332-0262-4030-87df-7ccaa069b2c1
+            SERIAL_NUMBER=$serial_number
+            NODE_LOCATION=EvalLab
+            CLUSTER_CREATE=TRUE
+            NODE_COUNT=1
+            ADMIN_PASSWORD=tryme123!
+            ROOT_AGGR_DISK_SIZE=$root_disk_size_mb
+            CLUSTER_MGMT_IP=$cluster_mgmt_ip
+            CLUSTER_MGMT_NETMASK=$cluster_mgmt_netmask
+            CLUSTER_MGMT_GATEWAY=$cluster_mgmt_gateway
+            NODE_MGMT_IP=$node_mgmt_ip
+            NODE_MGMT_NETMASK=$node_mgmt_netmask
+            NODE_MGMT_GATEWAY=$node_mgmt_gateway
+          params:
+            $node_name: {get_param: node_name}
+            $cluster_name: {get_param: cluster_name}
+            $node_mgmt_ip: {get_attr: [nw_port1, fixed_ips, 0, ip_address]}
+            $cluster_mgmt_ip: {get_attr: [nw_port0, fixed_ips, 0, ip_address]}
+            $root_disk_size_mb: {get_param: root_disk_size_mb}
+            $serial_number: {get_param: serial_number}
+            $cluster_mgmt_netmask: {get_param: cluster_mgmt_netmask}
+            $cluster_mgmt_gateway: {get_param: cluster_mgmt_gateway}
+            $node_mgmt_netmask: {get_param: node_mgmt_netmask}
+            $node_mgmt_gateway: {get_param: node_mgmt_gateway}
+
+  sdot_boot_volume_1:
+    type: OS::Cinder::Volume
+    properties:
+      availability_zone: { get_param: availability_zone }
+      size: 40
+      image: {get_param: ontap_image}
+  sdot_coredump_vol_1:
+    type: OS::Cinder::Volume
+    properties:
+      availability_zone: { get_param: availability_zone }
+      size: 120
+  sdot_root_vol_1_1:
+    type: OS::Cinder::Volume
+    properties:
+      availability_zone: { get_param: availability_zone }
+      size: 68
+  sdot_data_vol_1_1:
+    type: OS::Cinder::Volume
+    properties:
+      availability_zone: { get_param: availability_zone }
+      size: 100
+  sdot_data_vol_1_2:
+    type: OS::Cinder::Volume
+    properties:
+      availability_zone: { get_param: availability_zone }
+      size: 100
+
+
+
+root@seafile:/netapp#
+
+root@seafile:/netapp# openstack stack  create  -t heat_single.json ontap-singlenode-03
++---------------------+--------------------------------------------+
+| Field               | Value                                      |
++---------------------+--------------------------------------------+
+| id                  | f8f42f14-9830-48d1-86d2-ca110847d499       |
+| stack_name          | ontap-singlenode-03                        |
+| description         | ONTAP Select Single Node Cluster Template. |
+| creation_time       | 2018-10-05T09:53:16.880725                 |
+| updated_time        | None                                       |
+| stack_status        | CREATE_IN_PROGRESS                         |
+| stack_status_reason | Stack CREATE started                       |
++---------------------+--------------------------------------------+
+
+root@seafile:~# openstack stack list
++--------------------------------------+---------------------+-----------------+----------------------------+--------------+
+| ID                                   | Stack Name          | Stack Status    | Creation Time              | Updated Time |
++--------------------------------------+---------------------+-----------------+----------------------------+--------------+
+| f8f42f14-9830-48d1-86d2-ca110847d499 | ontap-singlenode-03 | CREATE_COMPLETE | 2018-10-05T09:53:16.880725 | None         |
+| eeaa4dc8-1a3c-4f5b-8aed-18e347b8477f | ontap-singlenode-01 | CREATE_COMPLETE | 2018-10-04T17:07:14.838101 | None         |
++--------------------------------------+---------------------+-----------------+----------------------------+--------------+
+root@seafile:~#
+root@seafile:~# openstack stack event list ontap-singlenode-03
+2018-10-05 09:53:17.404590 [ontap-singlenode-03]: CREATE_IN_PROGRESS  Stack CREATE started
+2018-10-05 09:53:17.430437 [ontap-singlenode-03.sdot_boot_volume_1]: CREATE_IN_PROGRESS  state changed
+2018-10-05 09:53:20.428760 [ontap-singlenode-03.nw_port0]: CREATE_IN_PROGRESS  state changed
+2018-10-05 09:53:21.592920 [ontap-singlenode-03.sdot_coredump_vol_1]: CREATE_IN_PROGRESS  state changed
+2018-10-05 09:53:22.059472 [ontap-singlenode-03.sdot_data_vol_1_2]: CREATE_IN_PROGRESS  state changed
+2018-10-05 09:53:22.616906 [ontap-singlenode-03.sdot_data_vol_1_1]: CREATE_IN_PROGRESS  state changed
+2018-10-05 09:53:23.505332 [ontap-singlenode-03.nw_port1]: CREATE_IN_PROGRESS  state changed
+2018-10-05 09:53:24.591758 [ontap-singlenode-03.sdot_root_vol_1_1]: CREATE_IN_PROGRESS  state changed
+2018-10-05 09:53:25.246727 [ontap-singlenode-03.nw_port0]: CREATE_COMPLETE  state changed
+2018-10-05 09:53:25.435504 [ontap-singlenode-03.sdot_data_vol_1_2]: CREATE_COMPLETE  state changed
+2018-10-05 09:53:25.880602 [ontap-singlenode-03.sdot_coredump_vol_1]: CREATE_COMPLETE  state changed
+2018-10-05 09:53:26.080633 [ontap-singlenode-03.sdot_boot_volume_1]: CREATE_COMPLETE  state changed
+2018-10-05 09:53:26.298152 [ontap-singlenode-03.sdot_data_vol_1_1]: CREATE_COMPLETE  state changed
+2018-10-05 09:53:26.544029 [ontap-singlenode-03.nw_port1]: CREATE_COMPLETE  state changed
+2018-10-05 09:53:27.761357 [ontap-singlenode-03.sdot_root_vol_1_1]: CREATE_COMPLETE  state changed
+2018-10-05 09:53:28.904815 [ontap-singlenode-03.my_instance]: CREATE_IN_PROGRESS  state changed
+2018-10-05 09:54:07.775294 [ontap-singlenode-03.my_instance]: CREATE_COMPLETE  state changed
+2018-10-05 09:54:07.801184 [ontap-singlenode-03]: CREATE_COMPLETE  Stack CREATE completed successfully
+
+root@seafile:~# openstack stack show ontap-singlenode-03
++-----------------------+-------------------------------------------------------------------------------------------------------------------------------------------------+
+| Field                 | Value                                                                                                                                           |
++-----------------------+-------------------------------------------------------------------------------------------------------------------------------------------------+
+| id                    | f8f42f14-9830-48d1-86d2-ca110847d499                                                                                                            |
+| stack_name            | ontap-singlenode-03                                                                                                                             |
+| description           | ONTAP Select Single Node Cluster Template.                                                                                                      |
+| creation_time         | 2018-10-05T09:53:16.880725                                                                                                                      |
+| updated_time          | None                                                                                                                                            |
+| stack_status          | CREATE_COMPLETE                                                                                                                                 |
+| stack_status_reason   | Stack CREATE completed successfully                                                                                                             |
+| parameters            | OS::project_id: 91d687759aed45d28b5f6084bc2fa8ad                                                                                                |
+|                       | OS::stack_id: f8f42f14-9830-48d1-86d2-ca110847d499                                                                                              |
+|                       | OS::stack_name: ontap-singlenode-03                                                                                                             |
+|                       | availability_zone: eu-de-01                                                                                                                     |
+|                       | cluster_mgmt_gateway: 192.168.0.1                                                                                                               |
+|                       | cluster_mgmt_netmask: 255.255.255.0                                                                                                             |
+|                       | cluster_name: heat-demo-single-node                                                                                                             |
+|                       | flavor: s2.xlarge.4                                                                                                                             |
+|                       | network_external: 9c58272b-d411-4de6-abf1-7b27acf647bc                                                                                          |
+|                       | node_mgmt_gateway: 192.168.0.1                                                                                                                  |
+|                       | node_mgmt_netmask: 255.255.255.0                                                                                                                |
+|                       | node_name: heat-demo-node2                                                                                                                      |
+|                       | ontap_image: ontapsinglenodetest3                                                                                                               |
+|                       | root_disk_size_mb: '69632'                                                                                                                      |
+|                       | serial_number: '99887766554433221101'                                                                                                           |
+|                       |                                                                                                                                                 |
+| outputs               | []                                                                                                                                              |
+|                       |                                                                                                                                                 |
+| links                 | - href: https://rts.eu-de.otc.t-systems.com/v1/91d687759aed45d28b5f6084bc2fa8ad/stacks/ontap-singlenode-03/f8f42f14-9830-48d1-86d2-ca110847d499 |
+|                       |   rel: self                                                                                                                                     |
+|                       |                                                                                                                                                 |
+| disable_rollback      | True                                                                                                                                            |
+| parent                | None                                                                                                                                            |
+| tags                  | None                                                                                                                                            |
+| stack_user_project_id | 26fe192f7cc74534991a1a505df51369                                                                                                                |
+| capabilities          | []                                                                                                                                              |
+| notification_topics   | []                                                                                                                                              |
+| timeout_mins          | None                                                                                                                                            |
+| stack_owner           | None                                                                                                                                            |
++-----------------------+-------------------------------------------------------------------------------------------------------------------------------------------------+
+root@seafile:~#
+root@seafile:/netapp# openstack server show f1e437b9-92b9-4c0c-b572-949886f62983
++--------------------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| Field                                | Value                                                                                                                                                                                                                                                      |
++--------------------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| OS-DCF:diskConfig                    | MANUAL                                                                                                                                                                                                                                                     |
+| OS-EXT-AZ:availability_zone          | eu-de-01                                                                                                                                                                                                                                                   |
+| OS-EXT-SRV-ATTR:host                 | pod05.eu-de-01                                                                                                                                                                                                                                             |
+| OS-EXT-SRV-ATTR:hypervisor_hostname  | nova008@75                                                                                                                                                                                                                                                 |
+| OS-EXT-SRV-ATTR:instance_name        | instance-00498978                                                                                                                                                                                                                                          |
+| OS-EXT-STS:power_state               | Running                                                                                                                                                                                                                                                    |
+| OS-EXT-STS:task_state                | None                                                                                                                                                                                                                                                       |
+| OS-EXT-STS:vm_state                  | active                                                                                                                                                                                                                                                     |
+| OS-SRV-USG:launched_at               | 2018-10-05T13:46:33.637195                                                                                                                                                                                                                                 |
+| OS-SRV-USG:terminated_at             | None                                                                                                                                                                                                                                                       |
+| accessIPv4                           |                                                                                                                                                                                                                                                            |
+| accessIPv6                           |                                                                                                                                                                                                                                                            |
+| addresses                            | c77ec9e2-ce66-4f58-9709-9d90e5fc13ee=192.168.0.251, 192.168.0.17                                                                                                                                                                                           |
+| config_drive                         | True                                                                                                                                                                                                                                                       |
+| created                              | 2018-10-05T09:53:35Z                                                                                                                                                                                                                                       |
+| flavor                               | s2.xlarge.4 (s2.xlarge.4)                                                                                                                                                                                                                                  |
+| hostId                               | 17c1605dfc86f15e2b1045e9e63b4d414e463facde68549dbab7fa7a                                                                                                                                                                                                   |
+| id                                   | f1e437b9-92b9-4c0c-b572-949886f62983                                                                                                                                                                                                                       |
+| image                                | 8abb768a-9628-4235-a665-2b64824273ab                                                                                                                                                                                                                       |
+| key_name                             | None                                                                                                                                                                                                                                                       |
+| name                                 | heat-demo-node2                                                                                                                                                                                                                                            |
+| os-extended-volumes:volumes_attached | [{u'id': u'f472520c-d3f8-4294-95f2-2b9e5472cb4d'}, {u'id': u'065450f0-46c2-4a79-b157-173e20b4dc16'}, {u'id': u'a1853d2d-5858-4950-a1e4-b0cadef00f43'}, {u'id': u'6e0a415d-d4ba-4edc-b157-a1e523738404'}, {u'id': u'f24d6394-ffd2-44ec-80fe-cc50c346d018'}] |
+| progress                             | 0                                                                                                                                                                                                                                                          |
+| project_id                           | 91d687759aed45d28b5f6084bc2fa8ad                                                                                                                                                                                                                           |
+| properties                           |                                                                                                                                                                                                                                                            |
+| security_groups                      | [{u'name': u'default'}, {u'name': u'default'}]                                                                                                                                                                                                             |
+| status                               | ACTIVE                                                                                                                                                                                                                                                     |
+| updated                              | 2018-10-05T13:46:33Z                                                                                                                                                                                                                                       |
+| user_id                              | cab172591ee04ba695e2466e7aa2ecc5                                                                                                                                                                                                                           |
++--------------------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+root@seafile:/netapp#
+
